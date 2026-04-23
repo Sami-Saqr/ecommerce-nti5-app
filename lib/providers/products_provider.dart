@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/product.dart';
 import '../services/api_service.dart';
+import '../utils/constants.dart';
 
 class Slider {
   final int id;
@@ -17,11 +18,12 @@ class Slider {
   });
 
   factory Slider.fromJson(Map<String, dynamic> json) {
+    final rawImage = json['image'] ?? json['image_url'] ?? '';
     return Slider(
       id: json['id'] ?? 0,
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      imageUrl: json['image'] ?? json['image_url'] ?? '',
+      imageUrl: AppConstants.getFullImageUrl(rawImage),
     );
   }
 }
@@ -40,11 +42,12 @@ class Category {
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
+    final rawImage = json['image'] ?? json['image_url'] ?? '';
     return Category(
       id: json['id'] ?? 0,
       name: json['title'] ?? json['name'] ?? '',
       description: json['description'] ?? '',
-      imageUrl: json['image'] ?? json['image_url'] ?? '',
+      imageUrl: AppConstants.getFullImageUrl(rawImage),
     );
   }
 }

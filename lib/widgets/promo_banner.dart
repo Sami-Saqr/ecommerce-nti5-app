@@ -101,29 +101,42 @@ class PromoBanner extends StatelessWidget {
           ),
 
           // Image
-          Positioned(
-            right: 0,
-            bottom: 0,
-            top: 0,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-              child: Image.network(
-                imageUrl ??
-                    'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&h=200&fit=crop',
-                width: 160,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 160,
-                    color: Colors.white24,
-                  );
-                },
+          if (imageUrl != null && imageUrl!.isNotEmpty)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              top: 0,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                child: Image.network(
+                  imageUrl!,
+                  width: 160,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: 160,
+                      color: Colors.white24,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 160,
+                      color: Colors.white24,
+                    );
+                  },
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

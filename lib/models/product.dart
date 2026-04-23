@@ -1,3 +1,5 @@
+import '../utils/constants.dart';
+
 class Product {
   final String id;
   final String name;
@@ -42,13 +44,14 @@ class Product {
   }
 
   factory Product.fromApiJson(Map<String, dynamic> json) {
+    final rawImage = json['image'] ?? json['image_url'] ?? '';
     return Product(
       id: json['id'].toString(),
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       originalPrice: json['original_price']?.toDouble(),
-      imageUrl: json['image'] ?? json['image_url'] ?? '',
+      imageUrl: AppConstants.getFullImageUrl(rawImage),
       rating: (json['rating'] ?? 0).toDouble(),
       reviewCount: json['review_count'] ?? json['reviewCount'] ?? 0,
       category: json['category']?['title'] ?? json['category_name'] ?? '',

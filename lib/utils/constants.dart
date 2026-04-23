@@ -3,6 +3,23 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String baseUrl =
       'https://nti-ecommerce-api-production-f760.up.railway.app/api/';
+  
+  static const String storageBaseUrl =
+      'https://nti-ecommerce-api-production-f760.up.railway.app/';
+
+  /// Builds full image URL from relative path
+  static String getFullImageUrl(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return '';
+    }
+    // If already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    // Remove leading slash if present
+    final cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    return '$storageBaseUrl$cleanPath';
+  }
 }
 
 class AppColors {
