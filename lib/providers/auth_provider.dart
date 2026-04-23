@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/user.dart';
@@ -53,6 +54,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   Future<bool> register({
     required String fullName,
     required String phone,
@@ -60,6 +64,7 @@ class AuthProvider with ChangeNotifier {
     required String password,
   }) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -70,28 +75,46 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      if (response.statusCode == 201) {
-        final data = response.data;
-        _token = data['access_token'];
-        ApiService.setAuthToken(_token!);
+      // Accept both 200 and 201 as success
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        // Handle both direct data and nested data structure
+        final data = responseData is Map && responseData.containsKey('data') 
+            ? responseData['data'] 
+            : responseData;
+        
+        _token = data['access_token'] ?? data['token'];
+        if (_token != null) {
+          ApiService.setAuthToken(_token!);
+        }
 
+        // User data might be in 'user' key or directly in data
+        final userData = data['user'] ?? data;
         _user = User(
-          id: data['user']['id'].toString(),
-          fullName: data['user']['name'] ?? data['user']['full_name'] ?? fullName,
-          email: data['user']['email'] ?? email,
-          phone: data['user']['phone'] ?? phone,
-          avatarUrl: data['user']['image'] ?? data['user']['avatar'],
+          id: (userData['id'] ?? '0').toString(),
+          fullName: userData['name'] ?? userData['full_name'] ?? fullName,
+          email: userData['email'] ?? email,
+          phone: userData['phone'] ?? phone,
+          avatarUrl: userData['image'] ?? userData['avatar'],
         );
 
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
+        _errorMessage = response.data?['message'] ?? 'Registration failed';
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
+      if (e is DioException) {
+        _errorMessage = e.response?.data?['message'] ?? 
+                        e.response?.data?['error'] ?? 
+                        'Registration failed. Please try again.';
+      } else {
+        _errorMessage = 'Registration failed. Please try again.';
+      }
       _isLoading = false;
       notifyListeners();
       return false;
