@@ -6,6 +6,7 @@ import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/orders_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/products_provider.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -43,6 +44,7 @@ class StylishApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => OrdersProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => ProductsProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, child) {

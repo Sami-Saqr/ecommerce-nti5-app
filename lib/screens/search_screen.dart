@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../models/product.dart';
+import '../providers/products_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/product_card.dart';
 
@@ -15,23 +16,41 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Product> _searchResults = [];
+  bool _isSearching = false;
   bool _hasSearched = false;
-
-  void _performSearch(String query) {
-    setState(() {
-      _hasSearched = true;
-      if (query.isEmpty) {
-        _searchResults = MockData.products;
-      } else {
-        _searchResults = MockData.searchProducts(query);
-      }
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _searchResults = MockData.products;
+    // Initialize with all products
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<ProductsProvider>();
+      setState(() {
+        _searchResults = provider.products;
+      });
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    setState(() {
+      _isSearching = true;
+      _hasSearched = true;
+    });
+
+    final provider = context.read<ProductsProvider>();
+
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = provider.products;
+        _isSearching = false;
+      });
+    } else {
+      final results = await provider.searchProducts(query);
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    }
   }
 
   @override
@@ -80,6 +99,16 @@ class _SearchScreenState extends State<SearchScreen> {
                   hintText: 'Search any Product..',
                   hintStyle: TextStyle(color: Colors.grey.shade400),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          color: Colors.grey.shade400,
+                          onPressed: () {
+                            _searchController.clear();
+                            _performSearch('');
+                          },
+                        )
+                      : null,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -87,6 +116,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ),
                 onChanged: _performSearch,
+                textInputAction: TextInputAction.search,
+                onSubmitted: _performSearch,
               ),
             ),
           ),
@@ -94,13 +125,27 @@ class _SearchScreenState extends State<SearchScreen> {
           // Results Count
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              '${_searchResults.length} Items',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${_searchResults.length} Items',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (_isSearching)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  ),
+              ],
             ),
           ),
 
@@ -114,39 +159,48 @@ class _SearchScreenState extends State<SearchScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.search_off,
+                          _hasSearched ? Icons.search_off : Icons.search,
                           size: 80,
                           color: Colors.grey.shade300,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No products found',
+                          _hasSearched
+                              ? 'No products found'
+                              : 'Start searching for products',
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.grey.shade500,
                           ),
                         ),
+                        if (_hasSearched && _searchController.text.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'Try a different search term',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   )
-                : Container(
-                    constraints:
-                        const BoxConstraints(maxHeight: 1000), // Limit height
-                    child: GridView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.65,
-                      ),
-                      itemCount: _searchResults.length,
-                      itemBuilder: (context, index) {
-                        final product = _searchResults[index];
-                        return ProductCard(product: product);
-                      },
+                : GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.65,
                     ),
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final product = _searchResults[index];
+                      return ProductCard(product: product);
+                    },
                   ),
           ),
         ],

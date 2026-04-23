@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorites_provider.dart';
+import '../providers/products_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/quantity_selector.dart';
 
@@ -21,7 +21,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final product = MockData.getProductById(widget.productId);
+    final productsProvider = context.watch<ProductsProvider>();
+    final product = productsProvider.getProductById(widget.productId);
 
     if (product == null) {
       return Scaffold(

@@ -5,6 +5,7 @@ class PromoBanner extends StatelessWidget {
   final String subtitle;
   final String description;
   final String buttonText;
+  final String? imageUrl;
   final VoidCallback? onTap;
 
   const PromoBanner({
@@ -13,6 +14,7 @@ class PromoBanner extends StatelessWidget {
     required this.subtitle,
     required this.description,
     required this.buttonText,
+    this.imageUrl,
     this.onTap,
   });
 
@@ -53,13 +55,14 @@ class PromoBanner extends StatelessWidget {
                     color: Colors.white70,
                   ),
                 ),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white60,
+                if (description.isNotEmpty)
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white60,
+                    ),
                   ),
-                ),
                 const SizedBox(height: 12),
                 GestureDetector(
                   onTap: onTap,
@@ -96,8 +99,8 @@ class PromoBanner extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Image Placeholder
+
+          // Image
           Positioned(
             right: 0,
             bottom: 0,
@@ -108,7 +111,8 @@ class PromoBanner extends StatelessWidget {
                 bottomRight: Radius.circular(16),
               ),
               child: Image.network(
-                'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&h=200&fit=crop',
+                imageUrl ??
+                    'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&h=200&fit=crop',
                 width: 160,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {

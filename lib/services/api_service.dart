@@ -30,7 +30,7 @@ class ApiService {
     required String password,
   }) async {
     final formData = FormData.fromMap({
-      'full_name': fullName,
+      'name': fullName,
       'phone': phone,
       'email': email,
       'password': password,
@@ -49,9 +49,9 @@ class ApiService {
     String? avatar,
   }) async {
     final formData = FormData.fromMap({
-      'full_name': fullName,
+      'name': fullName,
       'phone': phone,
-      if (avatar != null) 'avatar': await MultipartFile.fromFile(avatar),
+      if (avatar != null) 'image': await MultipartFile.fromFile(avatar),
     });
     return await _dio.put('update_profile', data: formData);
   }

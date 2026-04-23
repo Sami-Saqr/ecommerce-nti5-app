@@ -31,10 +31,10 @@ class AuthProvider with ChangeNotifier {
           final userData = userResponse.data;
           _user = User(
             id: userData['id'].toString(),
-            fullName: userData['full_name'] ?? '',
+            fullName: userData['name'] ?? userData['full_name'] ?? '',
             email: userData['email'] ?? '',
             phone: userData['phone'] ?? '',
-            avatarUrl: userData['avatar'],
+            avatarUrl: userData['image'] ?? userData['avatar'],
           );
         }
 
@@ -77,9 +77,10 @@ class AuthProvider with ChangeNotifier {
 
         _user = User(
           id: data['user']['id'].toString(),
-          fullName: data['user']['full_name'] ?? fullName,
+          fullName: data['user']['name'] ?? data['user']['full_name'] ?? fullName,
           email: data['user']['email'] ?? email,
           phone: data['user']['phone'] ?? phone,
+          avatarUrl: data['user']['image'] ?? data['user']['avatar'],
         );
 
         _isLoading = false;
@@ -117,9 +118,9 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = response.data;
         _user = _user!.copyWith(
-          fullName: data['full_name']?.toString() ?? _user!.fullName,
+          fullName: data['name']?.toString() ?? data['full_name']?.toString() ?? _user!.fullName,
           phone: data['phone']?.toString() ?? _user!.phone,
-          avatarUrl: data['avatar']?.toString() ?? _user!.avatarUrl,
+          avatarUrl: data['image']?.toString() ?? data['avatar']?.toString() ?? _user!.avatarUrl,
         );
 
         _isLoading = false;
