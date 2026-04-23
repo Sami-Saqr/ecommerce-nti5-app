@@ -122,7 +122,7 @@ class ProfileScreen extends StatelessWidget {
                   icon: Icons.favorite_border,
                   title: 'My Favorites',
                   onTap: () {
-                    // Navigate to favorites
+                    Navigator.pushNamed(context, '/favorites');
                   },
                 ),
                 

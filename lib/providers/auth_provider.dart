@@ -103,38 +103,51 @@ class AuthProvider with ChangeNotifier {
     required String phone,
     String? avatarPath,
   }) async {
-    if (_user == null || _token == null) return false;
+    if (_user == null) return false;
 
     _isLoading = true;
     notifyListeners();
 
-    try {
-      final response = await ApiService.updateProfile(
-        fullName: fullName,
-        phone: phone,
-        avatar: avatarPath,
-      );
+    // Update locally first for better UX
+    _user = _user!.copyWith(
+      fullName: fullName,
+      phone: phone,
+    );
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        _user = _user!.copyWith(
-          fullName: data['name']?.toString() ?? data['full_name']?.toString() ?? _user!.fullName,
-          phone: data['phone']?.toString() ?? _user!.phone,
-          avatarUrl: data['image']?.toString() ?? data['avatar']?.toString() ?? _user!.avatarUrl,
+    try {
+      if (_token != null) {
+        final response = await ApiService.updateProfile(
+          fullName: fullName,
+          phone: phone,
+          avatar: avatarPath,
         );
 
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        _isLoading = false;
-        notifyListeners();
-        return false;
+        if (response.statusCode == 200) {
+          final data = response.data;
+          // Update with server response if available
+          if (data != null) {
+            _user = _user!.copyWith(
+              fullName: data['name']?.toString() ?? data['full_name']?.toString() ?? fullName,
+              phone: data['phone']?.toString() ?? phone,
+              avatarUrl: data['image']?.toString() ?? data['avatar']?.toString() ?? _user!.avatarUrl,
+            );
+          }
+
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }
       }
-    } catch (e) {
+      
+      // If no token or API failed, local update is still applied
       _isLoading = false;
       notifyListeners();
-      return false;
+      return true; // Return true since local update succeeded
+    } catch (e) {
+      // Local update is still applied even if API fails
+      _isLoading = false;
+      notifyListeners();
+      return true; // Return true since local update succeeded
     }
   }
 

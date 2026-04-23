@@ -101,7 +101,47 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                         },
                         onCancel: order.status == OrderStatus.active
                             ? () async {
-                                await ordersProvider.cancelOrder(order.id);
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Cancel Order'),
+                                    content: const Text(
+                                        'Are you sure you want to cancel this order?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                        child: const Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, true),
+                                        child: Text(
+                                          'Yes, Cancel',
+                                          style: TextStyle(
+                                              color: AppColors.primary),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirmed == true) {
+                                  final success = await ordersProvider
+                                      .cancelOrder(order.id);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(success
+                                            ? 'Order cancelled successfully'
+                                            : 'Failed to cancel order'),
+                                        backgroundColor: success
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
                               }
                             : null,
                         onTrackDriver: order.status == OrderStatus.active

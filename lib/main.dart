@@ -20,6 +20,7 @@ import 'screens/settings_screen.dart';
 import 'screens/my_orders_screen.dart';
 import 'screens/order_details_screen.dart';
 import 'screens/main_navigation_screen.dart';
+import 'screens/favorites_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -132,6 +133,7 @@ class StylishApp extends StatelessWidget {
               '/edit-profile': (context) => const EditProfileScreen(),
               '/settings': (context) => const SettingsScreen(),
               '/my-orders': (context) => const MyOrdersScreen(),
+              '/favorites': (context) => const FavoritesScreen(),
             },
             onGenerateRoute: (settings) {
               if (settings.name == '/product-detail') {
